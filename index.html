@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgriMart — San Fabian, Pangasinan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bitter:wght@400;600;700;800&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --kraft:#F5F0E1;      /* page background (cream) */
+    --kraft-deep:#E9E2CD;
+    --paper:#FBF8EF;      /* card surface */
+    --white:#FFFFFF;
+    --forest:#1F3A2A;
+    --forest-2:#2E5238;
+    --stamp:#9A3E2E;      /* kept for reject / delete actions */
+    --stamp-2:#7E2F22;
+    --charcoal:#2B2A24;
+    --gold:#B8863B;       /* accent */
+    --blue:#2E5A78;
+    --thumb:#E9E2CD;
+    --muted:#7A7462;
+    --line: rgba(43,42,36,0.12);
+    --shadow: 0 2px 10px rgba(31,58,42,0.08);
+    --radius: 12px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--kraft);
+    color:var(--charcoal);font-family:'Work Sans',sans-serif;line-height:1.5;
+  }
+  h1,h2,h3,.display{font-family:'Bitter',serif;color:var(--forest);margin:0;}
+  button{font-family:inherit;cursor:pointer;}
+  input,select,textarea{font-family:inherit;}
+  ::selection{background:var(--gold);color:var(--charcoal);}
+
+
+  /* ---------- Header ---------- */
+  header{
+    background:var(--kraft);color:var(--charcoal);padding:14px 40px;
+    display:flex;align-items:center;gap:28px;position:sticky;top:0;z-index:50;
+    border-bottom:1px solid var(--line);flex-wrap:wrap;
+  }
+  .brandmark{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .brandmark .stamp-circle{
+    width:30px;height:30px;border-radius:50%;background:var(--forest);color:var(--kraft);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Bitter',serif;font-weight:700;font-size:12px;
+  }
+  .brandmark .name{font-family:'Bitter',serif;font-weight:700;font-size:18px;color:var(--forest);}
+  .brandmark .name span{color:var(--forest);}
+  .brandmark .tag{font-size:12px;color:var(--muted);margin-left:4px;}
+
+  .role-tabs{display:flex;gap:2px;margin-left:auto;flex-wrap:wrap;}
+  .role-tabs button{
+    background:none;border:none;color:var(--muted);
+    padding:7px 14px;font-size:13.5px;font-weight:500;border-radius:20px;white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .role-tabs button:hover{color:var(--forest);background:rgba(31,58,42,0.06);}
+  .role-tabs button.active{background:var(--forest);color:var(--kraft);font-weight:600;}
+
+  main{max-width:1180px;margin:0 auto;padding:26px 40px 80px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  /* ---------- Generic components ---------- */
+  .panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:22px 24px;margin-bottom:20px;box-shadow:var(--shadow);}
+  .panel h3{font-size:17.5px;margin-bottom:14px;}
+  .subtabs{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;}
+  .subtabs button{
+    background:var(--white);border:1px solid var(--line);color:var(--charcoal);
+    padding:9px 17px;border-radius:22px;font-size:13.5px;font-weight:600;transition:all .15s ease;
+  }
+  .subtabs button:hover{border-color:var(--forest);}
+  .subtabs button.active{background:var(--forest);color:var(--paper);border-color:var(--forest);}
+
+  .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px;margin-bottom:20px;}
+  .stat-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);}
+  .stat-card .v{font-family:'Bitter',serif;font-weight:800;font-size:26px;color:var(--forest);}
+  .stat-card .l{font-size:12.5px;color:#6B5F4B;margin-top:5px;}
+
+  .btn{border:none;padding:11px 20px;border-radius:8px;font-weight:600;font-size:14px;transition:all .15s ease;}
+  .btn-primary{background:var(--forest);color:var(--paper);}
+  .btn-primary:hover{background:var(--forest-2);}
+  .btn-stamp{background:var(--stamp);color:var(--paper);}
+  .btn-stamp:hover{background:var(--stamp-2);}
+  .btn-ghost{background:transparent;border:1.5px solid var(--forest);color:var(--forest);}
+  .btn-ghost:hover{background:rgba(33,54,41,0.08);}
+  .btn-sm{padding:7px 13px;font-size:12.5px;border-radius:4px;}
+  .btn:disabled{background:#C9BC9C!important;color:#6B5F4B!important;cursor:not-allowed;}
+
+  .badge{display:inline-block;font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:12px;}
+  .badge.pending{background:rgba(217,169,74,0.24);color:#8A6714;}
+  .badge.approved{background:rgba(47,74,52,0.16);color:var(--forest-2);}
+  .badge.rejected{background:rgba(154,62,46,0.16);color:var(--stamp);}
+  .badge.ready{background:rgba(46,90,120,0.16);color:var(--blue);}
+  .badge.completed{background:rgba(33,54,41,0.92);color:var(--paper);}
+  .badge.verified{background:rgba(217,169,74,0.24);color:#8A6714;}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{text-align:left;padding:10px 11px;border-bottom:1px solid var(--line);}
+  th{font-size:12px;color:#6B5F4B;font-weight:700;}
+  tr:last-child td{border-bottom:none;}
+
+  .field{margin-bottom:15px;}
+  .field label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--forest);}
+  .field .hint{font-size:11.5px;color:#6B5F4B;margin-top:4px;}
+  .field input,.field select,.field textarea{
+    width:100%;padding:10px 13px;border:1px solid var(--line);border-radius:5px;font-size:14px;background:var(--white);color:var(--charcoal);
+    transition:border-color .15s ease;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--forest);}
+  .field textarea{min-height:64px;resize:vertical;}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;}
+  @media(max-width:640px){.form-grid{grid-template-columns:1fr;}}
+
+  .empty-note{font-size:14px;color:#6B5F4B;text-align:center;padding:40px 20px;}
+  .empty-note .big{font-size:34px;display:block;margin-bottom:10px;}
+
+  /* ---------- Auth / gate screens ---------- */
+  .gate{max-width:440px;margin:36px auto;text-align:center;}
+  .gate .icon-circle{
+    width:66px;height:66px;border-radius:50%;background:var(--forest);color:var(--paper);
+    display:flex;align-items:center;justify-content:center;font-size:29px;margin:0 auto 16px;
+    box-shadow:var(--shadow);
+  }
+  .gate p{color:#463D2E;font-size:14.5px;margin-bottom:20px;}
+  .gate .panel{text-align:left;}
+
+  /* ---------- Weather widget ---------- */
+  .weather-card{
+    background:linear-gradient(135deg, var(--forest) 0%, var(--forest-2) 100%);color:var(--paper);border-radius:var(--radius);padding:22px 24px;
+    display:flex;flex-wrap:wrap;gap:26px;align-items:center;margin-bottom:8px;box-shadow:var(--shadow);
+  }
+  .weather-now{display:flex;align-items:center;gap:16px;}
+  .weather-now .wicon{font-size:46px;}
+  .weather-now .temp{font-family:'Bitter',serif;font-weight:800;font-size:34px;}
+  .weather-now .cond{font-size:13.5px;color:rgba(244,238,223,0.75);}
+  .wclass-badge{background:var(--gold);color:var(--charcoal);padding:7px 16px;border-radius:18px;font-weight:700;font-size:13px;}
+  .forecast-strip{display:flex;gap:14px;flex:1;overflow-x:auto;}
+  .fday{background:rgba(255,255,255,0.09);border-radius:var(--radius);padding:11px 13px;text-align:center;min-width:68px;}
+  .fday .d{font-size:11.5px;color:rgba(244,238,223,0.65);margin-bottom:5px;}
+  .fday .i{font-size:21px;}
+  .fday .t{font-size:12.5px;margin-top:5px;font-weight:600;}
+  .weather-note{font-size:12.5px;color:#463D2E;margin:10px 0 20px;padding-left:2px;}
+
+  .recommend-strip{display:flex;gap:14px;overflow-x:auto;padding-bottom:6px;}
+  .recommend-card{background:var(--white);border:1px solid var(--line);border-radius:var(--radius);min-width:150px;padding:13px;text-align:center;flex-shrink:0;}
+  .recommend-card .ic{font-size:30px;}
+  .recommend-card .n{font-size:13px;font-weight:600;margin-top:5px;}
+  .recommend-card .tag{font-size:10.5px;color:var(--forest-2);margin-top:2px;}
+
+  /* ---------- Product grid ---------- */
+  .filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:20px;align-items:center;}
+  .filter-bar select,.filter-bar input{
+    padding:10px 13px;border:1px solid var(--line);border-radius:5px;font-size:13.5px;background:var(--white);
+  }
+  .filter-bar .search-box{flex:1;min-width:190px;}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px;}
+  .card{background:transparent;border:none;border-radius:var(--radius);overflow:visible;display:flex;flex-direction:column;transition:transform .15s ease;}
+  .card:hover{transform:translateY(-3px);}
+  .card .thumb{height:170px;background:var(--thumb);border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:64px;position:relative;background-size:cover;background-position:center;}
+  .card .thumb .b{position:absolute;top:10px;left:10px;background:var(--kraft);color:var(--forest);font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;}
+  .card .thumb .stock{position:absolute;top:10px;right:10px;background:rgba(0,0,0,0.55);color:#fff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:10px;}
+  .card .body{padding:12px 2px 0;display:flex;flex-direction:column;gap:2px;flex:1;}
+  .card .name{font-weight:600;font-size:14.5px;color:var(--charcoal);}
+  .card .meta{font-size:12px;color:var(--muted);}
+  .card .price-row{margin-top:auto;padding-top:8px;display:flex;justify-content:space-between;align-items:center;}
+  .card .price{font-family:'Bitter',serif;font-weight:700;font-size:16px;color:var(--forest);}
+  .add-btn{background:var(--forest);color:var(--kraft);border:none;width:30px;height:30px;border-radius:50%;font-size:18px;font-weight:600;line-height:1;display:flex;align-items:center;justify-content:center;transition:background .15s ease;}
+  .add-btn:hover{background:var(--forest-2);}
+  .add-btn:disabled{background:#B5B09C;cursor:not-allowed;}
+
+  /* ---------- Drawer / modal (shared) ---------- */
+  .overlay{position:fixed;inset:0;background:rgba(36,31,23,0.45);opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:90;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .drawer{position:fixed;top:0;right:0;height:100%;width:390px;max-width:92vw;background:var(--kraft);z-index:100;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-8px 0 28px rgba(0,0,0,0.22);}
+  .drawer.show{transform:translateX(0);}
+  .drawer-head{background:var(--kraft);color:var(--forest);padding:18px 22px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);}
+  .drawer-head h3{color:var(--forest);font-size:18px;}
+  .close-btn{background:none;border:none;color:var(--forest);font-size:22px;}
+  .drawer-body{flex:1;overflow-y:auto;padding:16px 22px;}
+  .drawer-foot{padding:18px 22px 22px;border-top:1px solid var(--line);background:var(--kraft);}
+
+  .cart-item{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .cart-item .ic{width:52px;height:52px;background:var(--thumb);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0;background-size:cover;background-position:center;}
+  .cart-item .info{flex:1;}
+  .cart-item .n{font-weight:600;font-size:14px;}
+  .cart-item .p{font-size:12.5px;color:#6B5F4B;margin-top:2px;}
+  .qty-ctrl{display:flex;align-items:center;gap:9px;margin-top:7px;}
+  .qty-ctrl button{width:23px;height:23px;border-radius:50%;border:1px solid var(--line);background:#fff;font-size:13px;}
+  .remove-link{font-size:12px;color:var(--muted);background:none;border:none;text-decoration:underline;margin-top:5px;}
+  .total-row{display:flex;justify-content:space-between;font-size:14px;margin-bottom:5px;color:#463D2E;}
+  .total-row.grand{font-weight:700;font-size:17.5px;color:var(--forest);margin-top:7px;}
+
+  .modal{position:fixed;inset:0;z-index:110;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s ease;background:rgba(36,31,23,0.5);}
+  .modal.show{opacity:1;pointer-events:auto;}
+  .modal-card{background:var(--kraft);border-radius:14px;max-width:500px;width:100%;max-height:88vh;overflow-y:auto;padding:28px;box-shadow:0 20px 50px rgba(0,0,0,0.3);}
+ 
+  .confirm-view{text-align:center;padding:8px 0;}
+  .confirm-view .check{width:58px;height:58px;border-radius:50%;background:var(--forest);color:var(--paper);font-size:28px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;}
+  .order-id{font-family:'Bitter',serif;font-weight:700;color:var(--forest);font-size:18px;margin:10px 0;}
+
+  .photo-pick{display:flex;align-items:center;gap:14px;margin-top:6px;}
+  .photo-pick .preview{width:62px;height:62px;border-radius:5px;background:var(--forest);display:flex;align-items:center;justify-content:center;font-size:27px;background-size:cover;background-position:center;flex-shrink:0;}
+
+  .id-pill{
+    font-family:'Bitter',serif;font-weight:700;letter-spacing:0.5px;font-size:13px;
+    background:var(--forest);color:var(--gold);padding:5px 11px;border-radius:5px;display:inline-block;
+  }
+
+  footer{background:var(--forest);color:rgba(244,238,223,0.7);text-align:center;padding:22px;font-size:12.5px;}
+
+  /* ---------- Hero (from customer page) ---------- */
+  .hero{padding:18px 0 34px;display:grid;grid-template-columns:1.2fr 1fr;gap:48px;align-items:center;}
+  .hero-copy .eyebrow{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:1.5px;margin-bottom:12px;}
+  .hero-copy h1{font-size:46px;line-height:1.1;font-weight:700;max-width:520px;}
+  .hero-copy p{max-width:460px;margin-top:16px;font-size:15.5px;color:#5A5546;}
+  .hero-actions{margin-top:26px;display:flex;gap:12px;flex-wrap:wrap;}
+  .hero-actions .btn{padding:13px 24px;font-size:14.5px;}
+  .hero-actions .btn-ghost{padding:12px 22px;}
+  .hero-stamp{position:relative;min-height:260px;border-radius:16px;background:linear-gradient(135deg,#D8CFAF 0%,#B9C49A 55%,#8FA878 100%);display:flex;align-items:center;justify-content:center;overflow:hidden;}
+  .hero-stamp::before{content:"🧺🥬🍅🥕";font-size:64px;letter-spacing:6px;}
+  .hero-stamp > div{position:absolute;right:18px;bottom:18px;width:96px;height:96px;border-radius:50%;background:var(--kraft);border:2px solid var(--forest);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
+  .hero-stamp .txt{font-family:'Bitter',serif;font-weight:800;color:var(--forest);font-size:12px;line-height:1.15;letter-spacing:0.5px;}
+  .hero-stamp .sub{font-size:8px;font-weight:600;color:var(--muted);letter-spacing:1px;margin-top:3px;}
+  .how-box{display:none;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:22px 26px;margin-bottom:20px;}
+  .how-box.show{display:block;}
+  .how-box h3{font-size:18px;margin-bottom:10px;}
+  .how-box p{font-size:14px;color:#5A5546;margin:0 0 8px;}
+  .how-box p:last-child{margin:0;}
+
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;margin:8px 0 14px;flex-wrap:wrap;gap:10px;}
+  .section-head h2{font-size:22px;font-weight:700;}
+  .section-head .count{font-size:13px;color:var(--muted);}
+  nav.cats{display:flex;gap:2px;flex-wrap:wrap;margin-bottom:14px;}
+  nav.cats button{background:none;border:none;color:var(--muted);padding:7px 12px;font-size:13.5px;font-weight:500;border-radius:20px;white-space:nowrap;}
+  nav.cats button:hover{color:var(--forest);background:rgba(31,58,42,0.06);}
+  nav.cats button.active{color:var(--kraft);background:var(--forest);font-weight:600;}
+  .filter-bar select,.filter-bar input{border-radius:20px;padding:9px 16px;}
+
+  @media(max-width:820px){
+    header{padding:12px 16px;gap:12px;}
+    .role-tabs{width:100%;margin-left:0;justify-content:flex-start;}
+    main{padding:20px 20px 60px;}
+    .hero{grid-template-columns:1fr;gap:24px;padding-top:6px;}
+    .hero-stamp{min-height:180px;}
+    .hero-copy h1{font-size:32px;}
+  }
+
+  /* ---------- Site access gate ---------- */
+  #siteGate{position:fixed;inset:0;z-index:500;background:var(--forest);display:flex;align-items:center;justify-content:center;padding:24px;}
+  #siteGate.hidden{display:none;}
+  #siteGate .gatebox{background:var(--paper);border-radius:8px;padding:36px 32px;max-width:380px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.35);}
+  #siteGate .gatebox .lock{font-size:36px;margin-bottom:10px;}
+  #siteGate .gatebox h2{font-size:20px;margin-bottom:6px;}
+  #siteGate .gatebox p{font-size:13px;color:#6B5F4B;margin-bottom:20px;}
+  #siteGate input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:5px;font-size:15px;text-align:center;letter-spacing:2px;margin-bottom:12px;background:var(--white);}
+  #siteGate button{width:100%;background:var(--stamp);color:var(--paper);border:none;padding:13px;border-radius:5px;font-weight:700;font-size:14px;cursor:pointer;}
+  #siteGate button:hover{background:var(--stamp-2);}
+  #siteGate .err{color:var(--stamp);font-size:12.5px;margin-top:10px;min-height:16px;}
+  body.locked > *:not(#siteGate){display:none!important;}
+</style>
+</head>
+<body>
+
+<div id="siteGate">
+  <div class="gatebox">
+    <div class="lock">🔒</div>
+    <h2>AgriMart — Restricted Access</h2>
+    <p>Authorized users only. Enter the access code to continue.</p>
+    <input type="password" id="gateInput" placeholder="Access Code" autocomplete="off">
+    <button id="gateBtn">Enter Site</button>
+    <div class="err" id="gateErr"></div>
+  </div>
+</div>
+<script>
+(function(){
+  var ACCESS_CODE = "ANONANG2026";
+  document.body.classList.add('locked');
+  window.addEventListener('DOMContentLoaded', function(){
+    var input = document.getElementById('gateInput');
+    var btn = document.getElementById('gateBtn');
+    var err = document.getElementById('gateErr');
+    var gate = document.getElementById('siteGate');
+    function tryUnlock(){
+      if(input.value.trim().toUpperCase() === ACCESS_CODE){
+        document.body.classList.remove('locked');
+        gate.classList.add('hidden');
+      } else {
+        err.textContent = 'Incorrect access code. Please try again.';
+        input.value = '';
+        input.focus();
+      }
+    }
+    btn.onclick = tryUnlock;
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') tryUnlock(); });
+    input.focus();
+  });
+})();
+</script>
+
+<header>
+  <div class="brandmark">
+    <div class="stamp-circle">AM</div>
+    <div><div class="name">Agri<span>Mart</span></div></div>
+    <div class="tag">Anonang-Barawas, San Fabian, Pangasinan</div>
+  </div>
+  <div class="role-tabs" id="roleTabs">
+    <button data-role="buyer">🛒 Buyer</button>
+    <button data-role="farmer">🌾 Farmer</button>
+    <button data-role="admin">🛡️ Admin</button>
+  </div>
+</header>
+
+
+<main>
+  <div class="view" id="view-buyer"></div>
+  <div class="view" id="view-farmer"></div>
+  <div class="view" id="view-admin"></div>
+</main>
+
+<div class="overlay" id="overlay"></div>
+<div class="drawer" id="cartDrawer">
+  <div class="drawer-head"><h3>Your Basket</h3><button class="close-btn" id="closeCartBtn">×</button></div>
+  <div class="drawer-body" id="cartBody"></div>
+  <div class="drawer-foot">
+    <div class="total-row grand"><span>Total</span><span id="grandVal">₱0</span></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px;" id="checkoutBtn" disabled>Place Order (Cash on Pickup)</button>
+  </div>
+</div>
+<div class="modal" id="modal"><div class="modal-card" id="modalContent"></div></div>
+
+<script>
+/* =========================================================
+   CONFIG: valid seller Member IDs (Anonang-Barawas members only)
+========================================================= */
+const VALID_MEMBER_IDS = [
+  "ABF-2026-001","ABF-2026-002","ABF-2026-003","ABF-2026-004","ABF-2026-005",
+  "ABF-2026-006","ABF-2026-007","ABF-2026-008","ABF-2026-009","ABF-2026-010",
+  "ABF-2026-011","ABF-2026-012","ABF-2026-013","ABF-2026-014","ABF-2026-015",
+  "ABF-2026-016","ABF-2026-017","ABF-2026-018","ABF-2026-019","ABF-2026-020",
+];
+let memberIdUsage = {}; // id -> farmerId or null
+VALID_MEMBER_IDS.forEach(id=>memberIdUsage[id]=null);
+
+/* =========================================================
+   DATA
+========================================================= */
+const CATEGORIES = ["Vegetables","Fruits","Rice & Grains","Fish & Seafood","Poultry & Eggs"];
+const WEATHER_TAGS = ["Sunny/Dry Season","Rainy Season","All-Weather"];
+const UNITS = ["kilo","piece","dozen","sack","bundle"];
+const ICONS = {"Vegetables":"🥬","Fruits":"🥭","Rice & Grains":"🌾","Fish & Seafood":"🐟","Poultry & Eggs":"🥚"};
+
+let uidCounter = 1000;
+function uid(prefix){ return prefix + '-' + (uidCounter++); }
+
+let DB = {
+  farmers: [],
+  pendingFarmers: [],
+  products: [],
+  buyers: {},
+  orders: [],
+};
+
+
+
+/* =========================================================
+   API LAYER  (PHP + MySQL via api.php)
+========================================================= */
+const API_URL = 'api.php';
+async function api(action, body){
+  try{
+    const res = await fetch(API_URL + '?action=' + encodeURIComponent(action), {
+      method: body ? 'POST' : 'GET',
+      headers: body ? {'Content-Type':'application/json'} : {},
+      credentials: 'same-origin',
+      body: body ? JSON.stringify(body) : undefined,
+    });
+    return await res.json();
+  }catch(e){
+    return {ok:false, error:'Cannot reach the server. Is XAMPP (Apache + MySQL) running?'};
+  }
+}
+async function loadAll(){
+  const r = await api('bootstrap');
+  if(!r.ok){ console.warn(r.error); return false; }
+  DB.farmers = r.farmers.filter(f=>f.status!=='pending');
+  DB.pendingFarmers = r.farmers.filter(f=>f.status==='pending');
+  DB.products = r.products;
+  DB.orders = r.orders;
+  Object.keys(memberIdUsage).forEach(k=>delete memberIdUsage[k]);
+  Object.assign(memberIdUsage, r.memberIdUsage);
+  state.admin.loggedIn = !!r.isAdmin;
+  return true;
+}
+async function act(action, body){            // run a change, then reload from the database
+  const r = await api(action, body);
+  if(!r.ok) alert(r.error || 'Something went wrong.');
+  await loadAll();
+  return r;
+}
+
+// "Pickup" o "Delivery" depende sa pinanggalingang order
+function schedText(o){
+  if(o.mode==='Delivery'){
+    const a = String(o.address||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    return 'Delivery: ' + a + (o.pay ? ' · ' + o.pay : '');
+  }
+  return 'Pickup: ' + o.pickupDate + ' ' + o.pickupTime;
+}
+function persist(){}   // no longer needed: the database is the source of truth
+
+
+/* =========================================================
+   STATE
+========================================================= */
+let state = {
+  view: 'buyer',
+  buyer: { name:null, cart:{} },
+  farmerSession: { farmerId:null, formStage:null },
+  admin: { loggedIn:false },
+  buyerFilters: { cat:'All', maxPrice:'', search:'' },
+  weather: null,
+};
+
+function money(n){ return '₱'+Number(n).toLocaleString(); }
+function findProduct(id){ return DB.products.find(p=>p.id===id); }
+function findFarmer(id){ return DB.farmers.find(f=>f.id===id); }
+
+/* =========================================================
+   ROLE TABS
+========================================================= */
+document.querySelectorAll('#roleTabs button').forEach(btn=>{
+  btn.onclick = async ()=>{ state.view = btn.dataset.role; await loadAll(); renderAll(); };
+});
+function renderAll(){
+  document.querySelectorAll('#roleTabs button').forEach(b=>b.classList.toggle('active', b.dataset.role===state.view));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+state.view).classList.add('active');
+  if(state.view==='buyer') renderBuyer();
+  if(state.view==='farmer') renderFarmer();
+  if(state.view==='admin') renderAdmin();
+}
+
+/* =========================================================
+   WEATHER: fetch + rule-based classification
+========================================================= */
+const WCODE_MAP = {
+  0:['Clear Sky','☀️'],1:['Mostly Sunny','🌤️'],2:['Partly Cloudy','⛅'],3:['Overcast','☁️'],
+  45:['Foggy','🌫️'],48:['Foggy','🌫️'],
+  51:['Light Drizzle','🌦️'],53:['Drizzle','🌦️'],55:['Drizzle','🌦️'],
+  61:['Rain','🌧️'],63:['Rain','🌧️'],65:['Heavy Rain','🌧️'],
+  80:['Rain Showers','🌦️'],81:['Rain Showers','🌧️'],82:['Heavy Showers','⛈️'],
+  95:['Thunderstorm','⛈️'],96:['Thunderstorm','⛈️'],99:['Thunderstorm','⛈️'],
+};
+function describeCode(code){ return WCODE_MAP[code] || ['Fair','🌥️']; }
+
+function classifyWeather(code, tempMax, precipProb){
+  if((code>=51 && code<=99) || precipProb>=60){
+    return {label:'Rainy', tagMatch:'Rainy Season', icon:'🌧️', note:'Avoid harvesting or transporting produce today; watch for flooding in low-lying areas.'};
+  }
+  if(code<=1 && tempMax>=33){
+    return {label:'Hot & Sunny', tagMatch:'Sunny/Dry Season', icon:'🔆', note:'Dry-season conditions — good for harvesting vegetables and fruits that hold up well in heat.'};
+  }
+  if(code<=1){
+    return {label:'Sunny', tagMatch:'Sunny/Dry Season', icon:'☀️', note:'Good conditions for fieldwork and delivering produce today.'};
+  }
+  if(code<=3){
+    return {label:'Cloudy', tagMatch:'All-Weather', icon:'⛅', note:'Moderate conditions; safe for normal farm activities.'};
+  }
+  return {label:'Fair', tagMatch:'All-Weather', icon:'🌥️', note:'No particular weather advisory today.'};
+}
+
+async function fetchWeather(){
+  const url = "https://api.open-meteo.com/v1/forecast?latitude=16.153&longitude=120.428&current=temperature_2m,precipitation,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia%2FManila&forecast_days=5";
+  try{
+    const ctrl = new AbortController();
+    const t = setTimeout(()=>ctrl.abort(), 5000);
+    const res = await fetch(url, {signal: ctrl.signal});
+    clearTimeout(t);
+    if(!res.ok) throw new Error('bad response');
+    const data = await res.json();
+    state.weather = {
+      source:'live',
+      current: { temp: Math.round(data.current.temperature_2m), code: data.current.weather_code },
+      daily: data.daily.time.map((d,i)=>({
+        date:d, code:data.daily.weather_code[i],
+        tmax:Math.round(data.daily.temperature_2m_max[i]),
+        tmin:Math.round(data.daily.temperature_2m_min[i]),
+        pprob:data.daily.precipitation_probability_max[i],
+      })),
+    };
+  }catch(e){
+    state.weather = {
+      source:'mock',
+      current:{temp:29, code:80},
+      daily:[
+        {date:'D1',code:80,tmax:30,tmin:25,pprob:70},
+        {date:'D2',code:61,tmax:29,tmin:24,pprob:65},
+        {date:'D3',code:2,tmax:31,tmin:25,pprob:35},
+        {date:'D4',code:1,tmax:32,tmin:25,pprob:20},
+        {date:'D5',code:0,tmax:33,tmin:25,pprob:10},
+      ],
+    };
+  }
+  if(state.view==='buyer') renderBuyer();
+}
+fetchWeather();
+
+function weatherWidgetHTML(){
+  if(!state.weather){
+    return `<div class="weather-card"><div>Loading weather data...</div></div>`;
+  }
+  const w = state.weather;
+  const todayDaily = w.daily[0];
+  const cls = classifyWeather(w.current.code, todayDaily.tmax, todayDaily.pprob);
+  const [desc, icon] = describeCode(w.current.code);
+  const forecastHTML = w.daily.map((d,i)=>{
+    const [dd,di] = describeCode(d.code);
+    const label = i===0 ? 'Today' : new Date(Date.now()+i*86400000).toLocaleDateString('en-PH',{weekday:'short'});
+    return `<div class="fday"><div class="d">${label}</div><div class="i">${di}</div><div class="t">${d.tmax}°/${d.tmin}°</div></div>`;
+  }).join('');
+  return `
+    <div class="weather-card">
+      <div class="weather-now">
+        <div class="wicon">${icon}</div>
+        <div>
+          <div class="temp">${w.current.temp}°C</div>
+          <div class="cond">${desc} · San Fabian${w.source==='mock' ? ' (estimate)' : ''}</div>
+        </div>
+      </div>
+      <div class="wclass-badge">${cls.icon} ${cls.label}</div>
+      <div class="forecast-strip">${forecastHTML}</div>
+    </div>
+    <div class="weather-note">${cls.note}</div>
+  `;
+}
+
+function recommendationHTML(){
+  if(!state.weather) return '';
+  const todayDaily = state.weather.daily[0];
+  const cls = classifyWeather(state.weather.current.code, todayDaily.tmax, todayDaily.pprob);
+  const matches = DB.products.filter(p=>{
+    const f = findFarmer(p.farmerId);
+    return f && f.status==='approved' && p.qty>0 && (p.weatherTag===cls.tagMatch || p.weatherTag==='All-Weather');
+  }).slice(0,8);
+  if(matches.length===0) return '';
+  const cards = matches.map(p=>`
+    <div class="recommend-card">
+      <div class="ic">${p.icon}</div>
+      <div class="n">${p.name}</div>
+      <div class="tag">${money(p.price)}/${p.unit}</div>
+    </div>
+  `).join('');
+  return `
+    <div class="panel">
+      <h3>🌱 Recommended for today's ${cls.label} weather</h3>
+      <div class="recommend-strip">${cards}</div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   BUYER VIEW
+========================================================= */
+function renderBuyer(){
+  const el = document.getElementById('view-buyer');
+  if(!state.buyer.name){
+    el.innerHTML = `
+      <div class="gate">
+        <div class="icon-circle">🛒</div>
+        <h2>Welcome, Buyer!</h2>
+        <p>Enter your name to start shopping at AgriMart San Fabian.</p>
+        <div class="panel">
+          <div class="field"><label>Full Name</label><input type="text" id="buyerNameInput" placeholder="Name:"></div>
+          <button class="btn btn-primary" style="width:100%;" id="buyerEnterBtn">Start Shopping</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('buyerEnterBtn').onclick = ()=>{
+      const v = document.getElementById('buyerNameInput').value.trim();
+      if(!v){ alert('Please enter your name.'); return; }
+      state.buyer.name = v;
+      if(!DB.buyers[v]) DB.buyers[v] = {orders:[]};
+      renderBuyer();
+    };
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px;">
+      <div><h2 style="font-size:23px;">Hello, ${state.buyer.name}!</h2></div>
+      <div style="display:flex;gap:10px;">
+        <button class="btn btn-ghost btn-sm" id="myOrdersBtn">📦 My Orders</button>
+        <button class="btn btn-primary btn-sm" id="openCartBtn2">🧺 Basket (<span id="cartCountInline">0</span>)</button>
+        <button class="btn btn-ghost btn-sm" id="buyerSwitchBtn">Switch Name</button>
+      </div>
+    </div>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">SAN FABIAN, PANGASINAN</div>
+        <h1>Fresh from the soil, straight to your home.</h1>
+        <p>Shop for vegetables, fruits, rice, and milkfish from the local farmers and fisherfolk of San Fabian.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="shopNowBtn">Start shopping</button>
+          <button class="btn btn-ghost" id="howItWorksBtn">How does it work?</button>
+        </div>
+      </div>
+      <div class="hero-stamp">
+        <div>
+          <div class="txt">FRESH<br>HARVEST</div>
+          <div class="sub">EST. SAN FABIAN</div>
+        </div>
+      </div>
+    </section>
+    <div class="how-box" id="howBox">
+      <h3>How AgriMart works</h3>
+      <p>1. Browse fresh products below, by category or using search.</p>
+      <p>2. Add what you want to buy to your basket and adjust the quantity.</p>
+      <p>3. Place your order with your details — payment is Cash on Pickup.</p>
+    </div>
+    <div id="weatherZone">${weatherWidgetHTML()}</div>
+    <div id="recommendZone">${recommendationHTML()}</div>
+    <div class="section-head" id="productsAnchor">
+      <h2 id="sectionTitle">All Products</h2>
+      <span class="count" id="resultCount"></span>
+    </div>
+    <nav class="cats" id="catNav"></nav>
+    <div class="filter-bar">
+      <input type="text" class="search-box" id="searchInput" placeholder="Search for produce..." value="${state.buyerFilters.search}">
+      <input type="number" id="priceFilter" placeholder="Max price (₱)" value="${state.buyerFilters.maxPrice}" style="width:150px;">
+    </div>
+    <div class="grid" id="productGrid"></div>
+  `;
+
+  document.getElementById('searchInput').oninput = e=>{ state.buyerFilters.search=e.target.value; renderProductGrid(); };
+  document.getElementById('shopNowBtn').onclick = ()=>{ document.getElementById('productsAnchor').scrollIntoView({behavior:'smooth'}); };
+  document.getElementById('howItWorksBtn').onclick = ()=>{ document.getElementById('howBox').classList.toggle('show'); };
+  renderCatNav();
+  document.getElementById('priceFilter').oninput = e=>{ state.buyerFilters.maxPrice=e.target.value; renderProductGrid(); };
+  document.getElementById('openCartBtn2').onclick = openCart;
+  document.getElementById('myOrdersBtn').onclick = openMyOrders;
+  document.getElementById('buyerSwitchBtn').onclick = ()=>{ state.buyer.name=null; state.buyer.cart={}; renderBuyer(); };
+
+  renderProductGrid();
+  renderCart();
+}
+
+function renderCatNav(){
+  const nav = document.getElementById('catNav');
+  if(!nav) return;
+  nav.innerHTML = ['All'].concat(CATEGORIES).map(c=>`<button data-cat="${c}" class="${state.buyerFilters.cat===c?'active':''}">${c}</button>`).join('');
+  nav.querySelectorAll('button').forEach(b=>{
+    b.onclick = ()=>{ state.buyerFilters.cat=b.dataset.cat; renderCatNav(); renderProductGrid(); };
+  });
+}
+
+function renderProductGrid(){
+  const grid = document.getElementById('productGrid');
+  if(!grid) return;
+  const f = state.buyerFilters;
+  const list = DB.products.filter(p=>{
+    const farmer = findFarmer(p.farmerId);
+    if(!farmer || farmer.status!=='approved') return false;
+    if(f.cat!=='All' && p.category!==f.cat) return false;
+    if(f.maxPrice && p.price>Number(f.maxPrice)) return false;
+    if(f.search && !p.name.toLowerCase().includes(f.search.toLowerCase())) return false;
+    return true;
+  });
+  const titleEl = document.getElementById('sectionTitle');
+  if(titleEl) titleEl.textContent = f.cat==='All' ? 'All Products' : f.cat;
+  const countEl = document.getElementById('resultCount');
+  if(countEl) countEl.textContent = list.length + (list.length===1 ? ' item' : ' items');
+  if(list.length===0){
+    grid.innerHTML = `<div class="empty-note" style="grid-column:1/-1;"><span class="big">🌾</span>No produce listed yet.<br>Check back soon as Anonang-Barawas farmers add their harvest.</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(p=>{
+    const farmer = findFarmer(p.farmerId);
+    const thumbStyle = p.photo ? `style="background-image:url('${p.photo}')"` : '';
+    return `
+      <div class="card">
+        <div class="thumb" ${thumbStyle}>
+          ${!p.photo ? p.icon : ''}
+          <span class="b">${p.weatherTag.split('/')[0]}</span>
+          <span class="stock">${p.qty>0 ? p.qty+' '+p.unit : 'Out of stock'}</span>
+        </div>
+        <div class="body">
+          <div class="name">${p.name}</div>
+          <div class="meta">${farmer.name}</div>
+          <div class="meta">Harvested: ${p.harvestDate}</div>
+          <div class="price-row">
+            <div><span class="price">${money(p.price)}</span> <span class="meta">/${p.unit}</span></div>
+            <button class="add-btn" ${p.qty<=0?'disabled':''} data-id="${p.id}">+</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  grid.querySelectorAll('.add-btn').forEach(b=>{
+    b.onclick = ()=>{ addToCart(b.dataset.id); };
+  });
+}
+
+function addToCart(pid){
+  const p = findProduct(pid);
+  const inCart = state.buyer.cart[pid] || 0;
+  if(inCart+1 > p.qty){ alert('Not enough stock available for this item.'); return; }
+  state.buyer.cart[pid] = inCart+1;
+  renderCart();
+  openCart();
+}
+function changeQty(pid, delta){
+  const p = findProduct(pid);
+  let q = (state.buyer.cart[pid]||0)+delta;
+  if(q>p.qty){ alert('Reached the available stock limit.'); return; }
+  if(q<=0) delete state.buyer.cart[pid]; else state.buyer.cart[pid]=q;
+  renderCart();
+}
+
+const overlay = document.getElementById('overlay');
+const cartDrawer = document.getElementById('cartDrawer');
+function openCart(){ cartDrawer.classList.add('show'); overlay.classList.add('show'); }
+function closeCart(){ cartDrawer.classList.remove('show'); overlay.classList.remove('show'); }
+document.getElementById('closeCartBtn').onclick = closeCart;
+overlay.onclick = ()=>{ closeCart(); closeModal(); };
+
+function renderCart(){
+  const body = document.getElementById('cartBody');
+  const ids = Object.keys(state.buyer.cart);
+  const countEl = document.getElementById('cartCountInline');
+  if(countEl) countEl.textContent = ids.reduce((s,id)=>s+state.buyer.cart[id],0);
+
+  if(ids.length===0){
+    body.innerHTML = `<div class="empty-note">Your basket is empty.</div>`;
+    document.getElementById('grandVal').textContent = '₱0';
+    document.getElementById('checkoutBtn').disabled = true;
+    document.getElementById('checkoutBtn').onclick = null;
+    return;
+  }
+  let total = 0;
+  body.innerHTML = ids.map(id=>{
+    const p = findProduct(id); const qty = state.buyer.cart[id]; const lt = p.price*qty; total+=lt;
+    const icStyle = p.photo ? `style="background-image:url('${p.photo}')"` : '';
+    return `
+      <div class="cart-item">
+        <div class="ic" ${icStyle}>${!p.photo?p.icon:''}</div>
+        <div class="info">
+          <div class="n">${p.name}</div>
+          <div class="p">${money(p.price)}/${p.unit} · ${money(lt)}</div>
+          <div class="qty-ctrl">
+            <button data-act="minus" data-id="${id}">−</button><span>${qty}</span><button data-act="plus" data-id="${id}">+</button>
+          </div>
+          <button class="remove-link" data-id="${id}">Remove</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+  body.querySelectorAll('[data-act="minus"]').forEach(b=>b.onclick=()=>changeQty(b.dataset.id,-1));
+  body.querySelectorAll('[data-act="plus"]').forEach(b=>b.onclick=()=>changeQty(b.dataset.id,1));
+  body.querySelectorAll('.remove-link').forEach(b=>b.onclick=()=>{ delete state.buyer.cart[b.dataset.id]; renderCart(); });
+
+  document.getElementById('grandVal').textContent = money(total);
+  const cbtn = document.getElementById('checkoutBtn');
+  cbtn.disabled = false;
+  cbtn.onclick = ()=>{ renderPickupForm(); openModal(); };
+}
+
+function renderPickupForm(){
+  const ids = Object.keys(state.buyer.cart);
+  const total = ids.reduce((s,id)=>s+findProduct(id).price*state.buyer.cart[id],0);
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Schedule Pickup</h3>
+    <p style="font-size:13.5px;color:#6B5F4B;margin:6px 0 16px;">Cash on Pickup — pay when you collect your order.</p>
+    <div class="field"><label>Pickup Date</label><input type="date" id="pickupDate"></div>
+    <div class="field"><label>Pickup Time</label><input type="time" id="pickupTime"></div>
+    <div class="field"><label>Phone Number</label><input type="text" id="pickupPhone" placeholder="09XX XXX XXXX"></div>
+    <div style="background:var(--white);border:1px solid var(--line);border-radius:5px;padding:13px 15px;margin:14px 0;">
+      <div class="total-row grand"><span>Total to Pay</span><span>${money(total)}</span></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;" id="confirmOrderBtn">Confirm Order</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;" id="backBtn">Back</button>
+  `;
+  document.getElementById('backBtn').onclick = closeModal;
+  document.getElementById('confirmOrderBtn').onclick = async ()=>{
+    const date = document.getElementById('pickupDate').value;
+    const time = document.getElementById('pickupTime').value;
+    const phone = document.getElementById('pickupPhone').value.trim();
+    if(!date || !time || !phone){ alert('Please complete the date, time, and phone number.'); return; }
+
+    const r = await api('order_create', {
+      buyer: state.buyer.name, phone, mode:'Pickup', pickupDate:date, pickupTime:time, pay:'Cash on Pickup',
+      items: ids.map(id=>({productId:id, qty:state.buyer.cart[id]}))
+    });
+    if(!r.ok){ alert(r.error); await loadAll(); renderCart(); renderProductGrid(); return; }
+    const newOrderIds = r.orderIds;
+    await loadAll();
+
+    document.getElementById('modalContent').innerHTML = `
+      <div class="confirm-view">
+        <div class="check">✓</div>
+        <h3>Order submitted!</h3>
+        <p>Wait for the farmer to approve your pickup schedule.</p>
+        <div class="order-id">${newOrderIds.join(', ')}</div>
+        <button class="btn btn-primary" style="width:100%;margin-top:14px;" id="doneBtn">Done</button>
+      </div>
+    `;
+    document.getElementById('doneBtn').onclick = ()=>{
+      state.buyer.cart = {};
+      renderCart(); closeModal(); closeCart(); renderProductGrid();
+    };
+  };
+}
+
+function openMyOrders(){
+  const myOrders = DB.orders.filter(o=>o.buyer===state.buyer.name).slice().reverse();
+  const badgeClass = s=>({'Pending':'pending','Approved':'approved','Rejected':'rejected','Ready for Pickup':'ready','Completed':'completed'}[s]||'pending');
+  document.getElementById('modalContent').innerHTML = `
+    <h3>My Orders</h3>
+    ${myOrders.length===0 ? '<div class="empty-note">You have no orders yet.</div>' : myOrders.map(o=>{
+      const farmer = findFarmer(o.farmerId);
+      return `
+        <div style="border:1px solid var(--line);border-radius:5px;padding:13px 15px;margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <strong style="font-size:13.5px;">${o.id}</strong>
+            <span class="badge ${badgeClass(o.status)}">${o.status}</span>
+          </div>
+          <div style="font-size:12.5px;color:#6B5F4B;margin-top:4px;">Farmer: ${farmer ? farmer.name : '—'}</div>
+          <div style="font-size:13px;margin-top:6px;">
+            ${o.items.map(it=>`${it.name} × ${it.qty}`).join(', ')}
+          </div>
+          <div style="font-size:13px;margin-top:4px;">${schedText(o)} · Total: ${money(o.total)}</div>
+          ${o.farmerNote ? `<div style="font-size:12.5px;color:var(--stamp);margin-top:4px;">Farmer note: ${o.farmerNote}</div>` : ''}
+        </div>
+      `;
+    }).join('')}
+    <button class="btn btn-ghost" style="width:100%;margin-top:16px;" id="closeOrdersBtn">Close</button>
+  `;
+  document.getElementById('closeOrdersBtn').onclick = closeModal;
+  openModal();
+}
+
+/* =========================================================
+   MODAL open/close (shared)
+========================================================= */
+const modal = document.getElementById('modal');
+function openModal(){ modal.classList.add('show'); overlay.classList.add('show'); }
+function closeModal(){ modal.classList.remove('show'); overlay.classList.remove('show'); }
+
+/* =========================================================
+   FARMER VIEW
+========================================================= */
+function renderFarmer(){
+  const el = document.getElementById('view-farmer');
+  const fs = state.farmerSession;
+
+  if(!fs.farmerId){
+    if(fs.formStage==='register'){ renderFarmerRegisterForm(); return; }
+    el.innerHTML = `
+      <div class="gate">
+        <div class="icon-circle">🌾</div>
+        <h2>Farmer Login</h2>
+        <p>Select your account if you already have one, or register as a new seller using your Anonang-Barawas Member ID.</p>
+        <div class="panel">
+          <div class="field">
+            <label>Select your account</label>
+            <select id="farmerSelect">
+              <option value="">— Select —</option>
+              ${DB.farmers.map(f=>`<option value="${f.id}">${f.name} (${f.status})</option>`).join('')}
+              ${DB.pendingFarmers.map(f=>`<option value="${f.id}">${f.name} (pending)</option>`).join('')}
+            </select>
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-bottom:10px;" id="farmerLoginBtn">Log In</button>
+          <button class="btn btn-ghost" style="width:100%;" id="farmerRegisterBtn">Register as a New Seller</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('farmerLoginBtn').onclick = ()=>{
+      const v = document.getElementById('farmerSelect').value;
+      if(!v){ alert('Please select an account.'); return; }
+      fs.farmerId = v; renderFarmer();
+    };
+    document.getElementById('farmerRegisterBtn').onclick = ()=>{ fs.formStage='register'; renderFarmer(); };
+    return;
+  }
+
+  let farmer = findFarmer(fs.farmerId) || DB.pendingFarmers.find(f=>f.id===fs.farmerId);
+  if(!farmer){ fs.farmerId=null; renderFarmer(); return; }
+
+  if(farmer.status==='pending'){
+    el.innerHTML = `
+      <div class="gate">
+        <div class="icon-circle">⏳</div>
+        <h2>Awaiting Verification</h2>
+        <p>Thanks for registering, ${farmer.name}! Your account is pending while the admin reviews it. Check back later or try logging in again.</p>
+        <button class="btn btn-ghost" id="backBtn2">Go Back</button>
+      </div>
+    `;
+    document.getElementById('backBtn2').onclick = ()=>{ fs.farmerId=null; renderFarmer(); };
+    return;
+  }
+  if(farmer.status==='rejected'){
+    el.innerHTML = `
+      <div class="gate">
+        <div class="icon-circle">✕</div>
+        <h2>Account Not Verified</h2>
+        <p>Sorry, ${farmer.name}. The admin did not approve your registration. You may apply again.</p>
+        <button class="btn btn-primary" id="reapplyBtn">Apply Again</button>
+      </div>
+    `;
+    document.getElementById('reapplyBtn').onclick = async ()=>{
+      await act('farmer_reapply', {farmerId: farmer.id});
+      renderFarmer();
+    };
+    return;
+  }
+
+  const sub = fs.tab || 'overview';
+  const myProducts = DB.products.filter(p=>p.farmerId===farmer.id);
+  const myOrders = DB.orders.filter(o=>o.farmerId===farmer.id);
+  const completedOrders = myOrders.filter(o=>o.status==='Completed');
+  const totalSales = completedOrders.reduce((s,o)=>s+o.total,0);
+  const pendingOrders = myOrders.filter(o=>o.status==='Pending');
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-size:23px;">Farmer Dashboard — ${farmer.name}</h2>
+      <button class="btn btn-ghost btn-sm" id="farmerLogoutBtn">Log Out</button>
+    </div>
+    <div class="subtabs">
+      <button data-tab="overview" class="${sub==='overview'?'active':''}">Overview</button>
+      <button data-tab="produce" class="${sub==='produce'?'active':''}">My Produce</button>
+      <button data-tab="orders" class="${sub==='orders'?'active':''}">Orders ${pendingOrders.length?`(${pendingOrders.length})`:''}</button>
+      <button data-tab="reports" class="${sub==='reports'?'active':''}">Sales Report</button>
+    </div>
+    <div id="farmerTabBody"></div>
+  `;
+  document.getElementById('farmerLogoutBtn').onclick = ()=>{ state.farmerSession={farmerId:null,formStage:null}; renderFarmer(); };
+  el.querySelectorAll('.subtabs button').forEach(b=>b.onclick=()=>{ fs.tab=b.dataset.tab; renderFarmer(); });
+
+  const body = document.getElementById('farmerTabBody');
+
+  if(sub==='overview'){
+    body.innerHTML = `
+      <div class="stat-row">
+        <div class="stat-card"><div class="v">${myProducts.length}</div><div class="l">Active Listings</div></div>
+        <div class="stat-card"><div class="v">${myProducts.filter(p=>p.qty<=5).length}</div><div class="l">Low Stock Items</div></div>
+        <div class="stat-card"><div class="v">${pendingOrders.length}</div><div class="l">Pending Orders</div></div>
+        <div class="stat-card"><div class="v">${money(totalSales)}</div><div class="l">Total Sales (Completed)</div></div>
+      </div>
+      <div class="panel">
+        <h3>Seller Details</h3>
+        <p style="font-size:13.5px;color:#463D2E;">${farmer.name} · ${farmer.contact}</p>
+        <p style="font-size:13px;color:#6B5F4B;margin-bottom:8px;">${farmer.desc||''}</p>
+        <span class="id-pill">Member ID: ${farmer.memberId}</span>
+      </div>
+    `;
+  }
+
+  if(sub==='produce'){
+    body.innerHTML = `
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <h3 style="margin:0;">My Produce</h3>
+          <button class="btn btn-primary btn-sm" id="addProduceBtn">+ Add Produce</button>
+        </div>
+        ${myProducts.length===0 ? '<div class="empty-note">You have no listings yet.</div>' : `
+        <table>
+          <tr><th>Produce</th><th>Category</th><th>Price</th><th>Stock</th><th>Weather Tag</th><th>Harvested</th><th></th></tr>
+          ${myProducts.map(p=>`
+            <tr>
+              <td>${p.icon} ${p.name}</td><td>${p.category}</td><td>${money(p.price)}/${p.unit}</td>
+              <td>${p.qty} ${p.qty<=5?'⚠️':''}</td><td>${p.weatherTag}</td><td>${p.harvestDate}</td>
+              <td><button class="btn btn-ghost btn-sm" data-editp="${p.id}">Edit</button></td>
+            </tr>
+          `).join('')}
+        </table>`}
+      </div>
+    `;
+    document.getElementById('addProduceBtn').onclick = ()=>{ renderProduceForm(null, farmer); openModal(); };
+    body.querySelectorAll('[data-editp]').forEach(b=>b.onclick=()=>{ renderProduceForm(findProduct(b.dataset.editp), farmer); openModal(); });
+  }
+
+  if(sub==='orders'){
+    const relevant = myOrders.slice().reverse();
+    body.innerHTML = `
+      <div class="panel">
+        <h3>Orders</h3>
+        ${relevant.length===0 ? '<div class="empty-note">No orders yet.</div>' : relevant.map(o=>{
+          const badgeClass = {'Pending':'pending','Approved':'approved','Rejected':'rejected','Ready for Pickup':'ready','Completed':'completed'}[o.status];
+          return `
+            <div style="border:1px solid var(--line);border-radius:5px;padding:13px 15px;margin-top:10px;">
+              <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;">
+                <strong style="font-size:13.5px;">${o.id} — ${o.buyer}</strong>
+                <span class="badge ${badgeClass}">${o.status}</span>
+              </div>
+              <div style="font-size:13px;margin-top:6px;">${o.items.map(it=>`${it.name} × ${it.qty}`).join(', ')}</div>
+              <div style="font-size:12.5px;color:#6B5F4B;margin-top:4px;">${schedText(o)} · Tel: ${o.phone} · Total: ${money(o.total)}</div>
+              ${o.status==='Pending' ? `
+                <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+                  <button class="btn btn-primary btn-sm" data-approve="${o.id}">Approve</button>
+                  <button class="btn btn-ghost btn-sm" data-adjust="${o.id}">Adjust Quantity</button>
+                  <button class="btn btn-stamp btn-sm" data-reject="${o.id}">Reject</button>
+                </div>
+              ` : ''}
+              ${o.status==='Approved' ? `<button class="btn btn-ghost btn-sm" style="margin-top:8px;" data-ready="${o.id}">Mark Ready for Pickup</button>` : ''}
+              ${o.status==='Ready for Pickup' ? `<button class="btn btn-primary btn-sm" style="margin-top:8px;" data-complete="${o.id}">Mark Picked Up (Completed)</button>` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+    `;
+    body.querySelectorAll('[data-approve]').forEach(b=>b.onclick=async()=>{ await act('order_status',{orderId:b.dataset.approve,status:'Approved'}); renderFarmer(); });
+    body.querySelectorAll('[data-reject]').forEach(b=>b.onclick=async()=>{
+      const reason = prompt('Reason for rejecting (optional):','');
+      await act('order_status',{orderId:b.dataset.reject,status:'Rejected',note:reason||''});
+      renderFarmer();
+    });
+    body.querySelectorAll('[data-ready]').forEach(b=>b.onclick=async()=>{ await act('order_status',{orderId:b.dataset.ready,status:'Ready for Pickup'}); renderFarmer(); });
+    body.querySelectorAll('[data-complete]').forEach(b=>b.onclick=async()=>{ await act('order_status',{orderId:b.dataset.complete,status:'Completed'}); renderFarmer(); });
+    body.querySelectorAll('[data-adjust]').forEach(b=>b.onclick=()=>{
+      const o=DB.orders.find(x=>x.id===b.dataset.adjust);
+      renderAdjustForm(o); openModal();
+    });
+  }
+
+  if(sub==='reports'){
+    const esc2 = t=>String(t==null?'':t).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const statusCls = {'Pending':'pending','Approved':'approved','Rejected':'rejected','Ready for Pickup':'ready','Completed':'completed'};
+    const activeOrders = myOrders.filter(o=>o.status!=='Rejected');                       // hindi kasama ang tinanggihan
+    const expectedSales = myOrders.filter(o=>['Pending','Approved','Ready for Pickup'].includes(o.status)).reduce((s,o)=>s+o.total,0);
+    const buyerMap = {};
+    myOrders.forEach(o=>{
+      const b = buyerMap[o.buyer] = buyerMap[o.buyer] || {name:o.buyer, phone:o.phone, address:o.address, orders:0, spent:0, items:{}, last:o};
+      b.orders++; b.last = o;
+      if(o.status!=='Rejected'){ b.spent += o.total; o.items.forEach(it=>{ b.items[it.name]=(b.items[it.name]||0)+it.qty; }); }
+    });
+    const buyers = Object.values(buyerMap).sort((a,b)=>b.spent-a.spent);
+    const maxSale = Math.max(1, ...myProducts.map(p=>completedOrders.reduce((s,o)=>s+o.items.filter(it=>it.productId===p.id).reduce((s2,it)=>s2+it.qty*it.priceEach,0),0)));
+    body.innerHTML = `
+      <div class="stat-row">
+        <div class="stat-card"><div class="v">${money(totalSales)}</div><div class="l">Total Sales</div></div>
+        <div class="stat-card"><div class="v">${completedOrders.length}</div><div class="l">Completed Orders</div></div>
+        <div class="stat-card"><div class="v">${myOrders.filter(o=>o.status==='Rejected').length}</div><div class="l">Rejected Orders</div></div>
+        <div class="stat-card"><div class="v">${myOrders.length}</div><div class="l">Total Orders</div></div>
+        <div class="stat-card"><div class="v">${buyers.length}</div><div class="l">Mga Nag-order (Customers)</div></div>
+        <div class="stat-card"><div class="v">${money(expectedSales)}</div><div class="l">Inaasahang Benta (Pending / Approved)</div></div>
+      </div>
+      <div class="panel">
+        <h3>Sales per Product (Completed Orders)</h3>
+        ${myProducts.length===0 ? '<div class="empty-note">No products yet.</div>' : myProducts.map(p=>{
+          const sales = completedOrders.reduce((s,o)=>s+o.items.filter(it=>it.productId===p.id).reduce((s2,it)=>s2+it.qty*it.priceEach,0),0);
+          const pct = Math.round((sales/maxSale)*100);
+          return `
+            <div style="margin-bottom:11px;">
+              <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;"><span>${p.name}</span><span>${money(sales)}</span></div>
+              <div style="background:var(--line);height:8px;border-radius:4px;overflow:hidden;"><div style="width:${pct}%;background:var(--forest);height:100%;"></div></div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      <div class="panel">
+        <h3>Mga Nag-order sa Akin</h3>
+        ${buyers.length===0 ? '<div class="empty-note">Wala pang nag-order.</div>' : `
+        <div style="overflow-x:auto;">
+        <table>
+          <tr><th>Customer</th><th>Tel</th><th>Address</th><th>Orders</th><th>Mga Binili</th><th>Total Nabili</th></tr>
+          ${buyers.map(b=>`<tr>
+            <td><strong>${esc2(b.name)}</strong></td>
+            <td>${esc2(b.phone||'—')}</td>
+            <td>${esc2(b.address||'—')}</td>
+            <td>${b.orders}</td>
+            <td>${Object.keys(b.items).map(n=>esc2(n)+' × '+b.items[n]).join(', ') || '—'}</td>
+            <td>${money(b.spent)}</td>
+          </tr>`).join('')}
+        </table>
+        </div>`}
+      </div>
+
+      <div class="panel">
+        <h3>Lahat ng Order</h3>
+        ${myOrders.length===0 ? '<div class="empty-note">Wala pang order.</div>' : `
+        <div style="overflow-x:auto;">
+        <table>
+          <tr><th>Order ID</th><th>Petsa</th><th>Customer</th><th>Mga Item</th><th>Total</th><th>Status</th></tr>
+          ${myOrders.slice().reverse().map(o=>`<tr>
+            <td>${esc2(o.id)}</td>
+            <td>${o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}) : '—'}</td>
+            <td>${esc2(o.buyer)}</td>
+            <td>${o.items.map(it=>esc2(it.name)+' × '+it.qty).join(', ')}</td>
+            <td>${money(o.total)}</td>
+            <td><span class="badge ${statusCls[o.status]}">${o.status}</span></td>
+          </tr>`).join('')}
+        </table>
+        </div>`}
+      </div>
+    `;
+  }
+}
+
+function renderFarmerRegisterForm(){
+  const el = document.getElementById('view-farmer');
+  el.innerHTML = `
+    <div class="gate" style="max-width:540px;">
+      <div class="icon-circle">📝</div>
+      <h2>Seller Registration</h2>
+      <p>Only Anonang-Barawas members with a valid Member ID may register as a seller. Complete the details below — this will be sent to the admin for verification.</p>
+      <div class="panel" style="text-align:left;">
+        <div class="field">
+          <label>Anonang-Barawas Member ID</label>
+          <input type="text" id="regMemberId" placeholder="ID" style="text-transform:uppercase;">
+          <div class="hint">Only members issued a Member ID by AgriMart can sell here.</div>
+        </div>
+        <div class="field"><label>Full Name</label><input type="text" id="regName" placeholder="Name:"></div>
+        <div class="field"><label>Phone Number</label><input type="text" id="regContact" placeholder="09XX XXX XXXX"></div>
+        <div class="field"><label>Short Farm Description</label><textarea id="regDesc" placeholder="e.g. Rice and vegetable farm, 2 hectares"></textarea></div>
+        <button class="btn btn-primary" style="width:100%;margin-bottom:8px;" id="submitRegBtn">Submit for Verification</button>
+        <button class="btn btn-ghost" style="width:100%;" id="cancelRegBtn">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('cancelRegBtn').onclick = ()=>{ state.farmerSession.formStage=null; renderFarmer(); };
+  document.getElementById('submitRegBtn').onclick = async ()=>{
+    const memberId = document.getElementById('regMemberId').value.trim().toUpperCase();
+    const name = document.getElementById('regName').value.trim();
+    const contact = document.getElementById('regContact').value.trim();
+    const desc = document.getElementById('regDesc').value.trim();
+    if(!memberId || !name || !contact){ alert('Please complete the Member ID, name, and phone number.'); return; }
+    const r = await act('farmer_register', {memberId, name, contact, desc});
+    if(!r.ok) return;
+    state.farmerSession.formStage = null;
+    state.farmerSession.farmerId = r.farmerId;
+    renderFarmer();
+  };
+}
+
+function renderProduceForm(existing, farmer){
+  const isEdit = !!existing;
+  document.getElementById('modalContent').innerHTML = `
+    <h3>${isEdit?'Edit Produce':'Add New Produce'}</h3>
+    <div class="field"><label>Produce Name</label><input type="text" id="pfName" value="${isEdit?existing.name:''}"></div>
+    <div class="form-grid">
+      <div class="field"><label>Category</label>
+        <select id="pfCat">${CATEGORIES.map(c=>`<option ${isEdit&&existing.category===c?'selected':''}>${c}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Weather Suitability Tag</label>
+        <select id="pfTag">${WEATHER_TAGS.map(t=>`<option ${isEdit&&existing.weatherTag===t?'selected':''}>${t}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Price (₱)</label><input type="number" id="pfPrice" value="${isEdit?existing.price:''}"></div>
+      <div class="field"><label>Unit</label>
+        <select id="pfUnit">${UNITS.map(u=>`<option ${isEdit&&existing.unit===u?'selected':''}>${u}</option>`).join('')}</select>
+      </div>
+      <div class="field"><label>Quantity</label><input type="number" id="pfQty" value="${isEdit?existing.qty:''}"></div>
+      <div class="field"><label>Harvest Date</label><input type="date" id="pfHarvest" value="${isEdit?existing.harvestDate:''}"></div>
+    </div>
+    <div class="field">
+      <label>Product Photo</label>
+      <div class="photo-pick">
+        <div class="preview" id="pfPreview" style="${isEdit&&existing.photo?`background-image:url('${existing.photo}')`:''}">${isEdit&&existing.photo?'':(isEdit?existing.icon:'📷')}</div>
+        <input type="file" accept="image/*" id="pfPhoto">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px;">
+      <button class="btn btn-primary" id="pfSaveBtn" style="flex:1;">${isEdit?'Save Changes':'Add to Listing'}</button>
+      ${isEdit?`<button class="btn btn-stamp" id="pfDeleteBtn">Delete</button>`:''}
+    </div>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;" id="pfCancelBtn">Close</button>
+  `;
+  let photoData = isEdit ? existing.photo : null;
+  document.getElementById('pfPhoto').onchange = (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        // paliitin ang litrato (max 640px) para magkasya sa storage
+        const max = 640, scale = Math.min(1, max/Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width*scale); c.height = Math.round(img.height*scale);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        photoData = c.toDataURL('image/jpeg', 0.72);
+        const prev = document.getElementById('pfPreview');
+        prev.style.backgroundImage = `url('${photoData}')`;
+        prev.textContent = '';
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  document.getElementById('pfCancelBtn').onclick = closeModal;
+  document.getElementById('pfSaveBtn').onclick = async ()=>{
+    const name = document.getElementById('pfName').value.trim();
+    const category = document.getElementById('pfCat').value;
+    const weatherTag = document.getElementById('pfTag').value;
+    const price = Number(document.getElementById('pfPrice').value);
+    const unit = document.getElementById('pfUnit').value;
+    const qty = Number(document.getElementById('pfQty').value);
+    const harvestDate = document.getElementById('pfHarvest').value;
+    if(!name || !price || !harvestDate || qty<0 || isNaN(qty)){ alert('Please complete all fields correctly.'); return; }
+    const r = await act('product_save', {id: isEdit?existing.id:null, farmerId:farmer.id, name, category, weatherTag, price, unit, qty, harvestDate, photo:photoData});
+    if(!r.ok) return;
+    closeModal();
+    renderFarmer();
+  };
+  if(isEdit){
+    document.getElementById('pfDeleteBtn').onclick = async ()=>{
+      if(confirm('Are you sure you want to delete this product?')){
+        await act('product_delete', {id: existing.id, farmerId: farmer.id});
+        closeModal(); renderFarmer();
+      }
+    };
+  }
+}
+
+function renderAdjustForm(order){
+  document.getElementById('modalContent').innerHTML = `
+    <h3>Adjust Quantity — ${order.id}</h3>
+    <p style="font-size:13px;color:#6B5F4B;margin-bottom:14px;">Change the quantity if available stock cannot fulfill the request in full.</p>
+    ${order.items.map((it,idx)=>`
+      <div class="field">
+        <label>${it.name} (requested: ${it.qty})</label>
+        <input type="number" min="0" max="${it.qty}" value="${it.qty}" data-idx="${idx}" class="adjQty">
+      </div>
+    `).join('')}
+    <button class="btn btn-primary" style="width:100%;" id="applyAdjustBtn">Approve with New Quantity</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px;" id="cancelAdjustBtn">Cancel</button>
+  `;
+  document.getElementById('cancelAdjustBtn').onclick = closeModal;
+  document.getElementById('applyAdjustBtn').onclick = async ()=>{
+    const quantities = {};
+    document.querySelectorAll('.adjQty').forEach(inp=>{ quantities[Number(inp.dataset.idx)] = Number(inp.value); });
+    await act('order_adjust', {orderId: order.id, quantities});
+    closeModal();
+    renderFarmer();
+  };
+}
+
+/* =========================================================
+   ADMIN VIEW
+========================================================= */
+function renderAdmin(){
+  const el = document.getElementById('view-admin');
+  if(!state.admin.loggedIn){
+    el.innerHTML = `
+      <div class="gate">
+        <div class="icon-circle">🛡️</div>
+        <h2>Admin Login</h2>
+        <div class="panel">
+          <div class="field"><label>Username</label><input type="text" id="adminUser"></div>
+          <div class="field"><label>Password</label><input type="password" id="adminPass"></div>
+          <button class="btn btn-primary" style="width:100%;" id="adminLoginBtn">Log In</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('adminLoginBtn').onclick = async ()=>{
+      const username = document.getElementById('adminUser').value.trim();
+      const password = document.getElementById('adminPass').value;
+      const r = await api('admin_login', {username, password});
+      if(!r.ok){ alert(r.error); return; }
+      await loadAll(); renderAdmin();
+    };
+    return;
+  }
+
+  const sub = state.admin.tab || 'verify';
+  const allOrders = DB.orders;
+  const totalSales = allOrders.filter(o=>o.status==='Completed').reduce((s,o)=>s+o.total,0);
+
+  el.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px;">
+      <h2 style="font-size:23px;">Admin Panel</h2>
+      <button class="btn btn-ghost btn-sm" id="adminLogoutBtn">Log Out</button>
+    </div>
+    <div class="subtabs">
+      <button data-tab="verify" class="${sub==='verify'?'active':''}">Farmer Verification ${DB.pendingFarmers.length?`(${DB.pendingFarmers.length})`:''}</button>
+      <button data-tab="farmers" class="${sub==='farmers'?'active':''}">All Farmers</button>
+      <button data-tab="memberids" class="${sub==='memberids'?'active':''}">Member IDs</button>
+      <button data-tab="products" class="${sub==='products'?'active':''}">All Produce</button>
+      <button data-tab="reports" class="${sub==='reports'?'active':''}">Transaction Report</button>
+    </div>
+    <div id="adminTabBody"></div>
+  `;
+  document.getElementById('adminLogoutBtn').onclick = async ()=>{ await api('admin_logout',{}); state.admin.loggedIn=false; renderAdmin(); };
+  el.querySelectorAll('.subtabs button').forEach(b=>b.onclick=()=>{ state.admin.tab=b.dataset.tab; renderAdmin(); });
+
+  const body = document.getElementById('adminTabBody');
+
+  if(sub==='verify'){
+    body.innerHTML = `
+      <div class="panel">
+        <h3>Pending Seller Registrations</h3>
+        ${DB.pendingFarmers.length===0 ? '<div class="empty-note">No pending registrations.</div>' : DB.pendingFarmers.map(f=>`
+          <div style="border:1px solid var(--line);border-radius:5px;padding:13px 15px;margin-top:10px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;">
+              <strong>${f.name}</strong> <span class="id-pill">${f.memberId}</span>
+            </div>
+            <div style="font-size:12.5px;color:#6B5F4B;margin:5px 0;">${f.contact} — ${f.desc||'(no description)'}</div>
+            <div style="display:flex;gap:8px;margin-top:6px;">
+              <button class="btn btn-primary btn-sm" data-approve="${f.id}">Approve</button>
+              <button class="btn btn-stamp btn-sm" data-reject="${f.id}">Reject</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    body.querySelectorAll('[data-approve]').forEach(b=>b.onclick=async()=>{ await act('farmer_decide',{farmerId:b.dataset.approve,decision:'approved'}); renderAdmin(); });
+    body.querySelectorAll('[data-reject]').forEach(b=>b.onclick=async()=>{ await act('farmer_decide',{farmerId:b.dataset.reject,decision:'rejected'}); renderAdmin(); });
+  }
+
+  if(sub==='farmers'){
+    body.innerHTML = `
+      <div class="panel">
+        <h3>All Farmers</h3>
+        ${DB.farmers.length===0 ? '<div class="empty-note">No farmer accounts yet.</div>' : `
+        <table>
+          <tr><th>Name</th><th>Member ID</th><th>Contact</th><th>Status</th></tr>
+          ${DB.farmers.map(f=>`
+            <tr><td>${f.name}</td><td>${f.memberId}</td><td>${f.contact}</td>
+            <td><span class="badge ${f.status==='approved'?'approved':'rejected'}">${f.status}</span></td></tr>
+          `).join('')}
+        </table>`}
+      </div>
+    `;
+  }
+
+  if(sub==='memberids'){
+    body.innerHTML = `
+      <div class="panel">
+        <h3>Anonang-Barawas Seller Member IDs</h3>
+        <p style="font-size:13px;color:#6B5F4B;margin-bottom:14px;">These are the only IDs that may be used to register as a seller. Distribute these to verified members.</p>
+        <table>
+          <tr><th>Member ID</th><th>Status</th><th>Registered Name</th></tr>
+          ${VALID_MEMBER_IDS.map(id=>{
+            const farmerId = memberIdUsage[id];
+            const farmer = farmerId ? (findFarmer(farmerId) || DB.pendingFarmers.find(f=>f.id===farmerId)) : null;
+            const statusLabel = !farmer ? 'Available' : (farmer.status==='approved' ? 'Used — Approved' : farmer.status==='pending' ? 'Used — Pending' : 'Used — Rejected');
+            const badgeCls = !farmer ? 'ready' : (farmer.status==='approved' ? 'approved' : farmer.status==='pending' ? 'pending' : 'rejected');
+            return `<tr><td class="id-pill" style="display:inline-block;">${id}</td><td><span class="badge ${badgeCls}">${statusLabel}</span></td><td>${farmer ? farmer.name : '—'}</td></tr>`;
+          }).join('')}
+        </table>
+      </div>
+    `;
+  }
+
+  if(sub==='products'){
+    body.innerHTML = `
+      <div class="panel">
+        <h3>Inventory Monitoring — All Produce</h3>
+        ${DB.products.length===0 ? '<div class="empty-note">No produce listed yet.</div>' : `
+        <table>
+          <tr><th>Produce</th><th>Farmer</th><th>Category</th><th>Price</th><th>Stock</th></tr>
+          ${DB.products.map(p=>{
+            const f = findFarmer(p.farmerId);
+            return `<tr><td>${p.icon} ${p.name}</td><td>${f?f.name:'—'}</td><td>${p.category}</td><td>${money(p.price)}/${p.unit}</td><td>${p.qty} ${p.qty<=5?'⚠️':''}</td></tr>`;
+          }).join('')}
+        </table>`}
+      </div>
+    `;
+  }
+
+  if(sub==='reports'){
+    const byStatus = {};
+    ['Pending','Approved','Rejected','Ready for Pickup','Completed'].forEach(s=>byStatus[s]=allOrders.filter(o=>o.status===s).length);
+    body.innerHTML = `
+      <div class="stat-row">
+        <div class="stat-card"><div class="v">${money(totalSales)}</div><div class="l">Total Sales</div></div>
+        <div class="stat-card"><div class="v">${allOrders.length}</div><div class="l">Total Orders</div></div>
+        <div class="stat-card"><div class="v">${byStatus['Completed']}</div><div class="l">Completed</div></div>
+        <div class="stat-card"><div class="v">${byStatus['Pending']}</div><div class="l">Pending</div></div>
+      </div>
+      <div class="panel">
+        <h3>All Transactions</h3>
+        ${allOrders.length===0 ? '<div class="empty-note">No transactions yet.</div>' : `
+        <table>
+          <tr><th>Order ID</th><th>Buyer</th><th>Farmer</th><th>Total</th><th>Status</th><th>Pickup</th></tr>
+          ${allOrders.slice().reverse().map(o=>{
+            const f = findFarmer(o.farmerId);
+            const badgeClass = {'Pending':'pending','Approved':'approved','Rejected':'rejected','Ready for Pickup':'ready','Completed':'completed'}[o.status];
+            return `<tr><td>${o.id}</td><td>${o.buyer}</td><td>${f?f.name:'—'}</td><td>${money(o.total)}</td><td><span class="badge ${badgeClass}">${o.status}</span></td><td>${schedText(o)}</td></tr>`;
+          }).join('')}
+        </table>`}
+      </div>
+    `;
+  }
+}
+
+/* =========================================================
+   INIT
+========================================================= */
+['renderFarmer','renderAdmin','renderBuyer','renderProductGrid','renderCart'].forEach(name=>{
+  const original = window[name];
+  window[name] = function(){ persist(); return original.apply(this, arguments); };
+});
+loadAll().then(renderAll);
+</script>
+</body>
+</html>
