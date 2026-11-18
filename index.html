@@ -374,12 +374,13 @@ let DB = {
 const API_URL = 'api.php';
 async function api(action, body){
   try{
-    const res = await fetch(API_URL + '?action=' + encodeURIComponent(action), {
-      method: body ? 'POST' : 'GET',
-      headers: body ? {'Content-Type':'application/json'} : {},
-      credentials: 'same-origin',
-      body: body ? JSON.stringify(body) : undefined,
-    });
+    const res = await fetch('api.php?action=admin_login', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json' // or 'application/x-www-form-urlencoded'
+    },
+    body: JSON.stringify({ username, password })
+})
     return await res.json();
   }catch(e){
     return {ok:false, error:'Cannot reach the server. Is XAMPP (Apache + MySQL) running?'};
